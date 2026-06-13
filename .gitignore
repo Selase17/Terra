@@ -47,3 +47,4 @@ terraform.tfvars.example
 
 terraform.tfvars
 *.tar.gz
+modules/**/.terraform.lock.hcl
