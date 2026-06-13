@@ -115,6 +115,9 @@ jobs:
           terraform plan -no-color -out=tfplan \
             -var="db_username=${{ secrets.DB_USERNAME }}" \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            var="db_backup_retention_period=0" \
+            -var="db_deletion_protection=false" \
+            -var="db_instance_class=db.t3.micro" \
             2>&1 | tee plan_output.txt
           echo "exitcode=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
         continue-on-error: true
@@ -206,4 +209,7 @@ jobs:
         run: |
           terraform apply -auto-approve \
             -var="db_username=${{ secrets.DB_USERNAME }}" \
-            -var="db_password=${{ secrets.DB_PASSWORD }}"
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="db_backup_retention_period=0" \
+            -var="db_deletion_protection=false" \
+            -var="db_instance_class=db.t3.micro"
