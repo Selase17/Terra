@@ -1,0 +1,70 @@
+repos:
+  # ─────────────────────────────────────────────
+  # General file hygiene
+  # ─────────────────────────────────────────────
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-yaml
+        args: [--allow-multiple-documents]
+      - id: check-json
+      - id: check-added-large-files
+        args: [--maxkb=1024]
+      - id: no-commit-to-branch
+        args: [--branch, main]
+      - id: detect-private-key
+
+  # ─────────────────────────────────────────────
+  # Terraform: format, validate, docs, tfsec, checkov
+  # ─────────────────────────────────────────────
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.88.0
+    hooks:
+      # Auto-format all .tf files
+      - id: terraform_fmt
+
+      # Syntax and schema validation
+      - id: terraform_validate
+        args:
+          - --args=-no-color
+
+      # Generate/update module README from terraform-docs
+      - id: terraform_docs
+        args:
+          - --args=--output-mode=replace
+          - --args=--output-file=README.md
+
+      # tfsec — security linter for changed .tf files
+      - id: terraform_tfsec
+        args:
+          - --args=--minimum-severity=CRITICAL
+          - --args=--no-color
+          - --args=--exclude=aws-elb-alb-not-public,aws-ec2-no-public-egress-sgr,aws-elb-http-not-used,aws-iam-no-policy-wildcards,aws-s3-encryption-customer-key,aws-s3-enable-bucket-logging
+
+      # Checkov — policy-as-code for changed .tf files
+      - id: terraform_checkov
+        args:
+          - --args=--quiet
+          - --args=--framework=terraform
+          - --args=--skip-check=CKV_AWS_79,CKV_AWS_382,CKV_AWS_260,CKV2_AWS_5,CKV2_AWS_12,CKV_AWS_378,CKV2_AWS_28,CKV2_AWS_64,CKV_AWS_157,CKV_AWS_353,CKV2_AWS_69,CKV_AWS_158,CKV_AWS_338
+
+  # ─────────────────────────────────────────────
+  # Secret detection — prevent credential commits
+  # ─────────────────────────────────────────────
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: .secrets.baseline
+
+  # ─────────────────────────────────────────────
+  # Gitleaks — git-history secret scanner
+  # ─────────────────────────────────────────────
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.2
+    hooks:
+      - id: gitleaks
